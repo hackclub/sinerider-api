@@ -1,4 +1,3 @@
-import { exec } from 'child_process';
 import puppeteer, { Page, TimeoutError } from 'puppeteer';
 import { base } from "./config.js";
 
@@ -166,6 +165,15 @@ export async function generateLevel() {
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
   const page = await browser.newPage();
+
+  page
+  .on('console', message =>
+    console.log(`${message.type().substr(0, 3).toUpperCase()} ${message.text()}`))
+  .on('pageerror', ({ message }) => console.log(message))
+  .on('response', response =>
+    console.log(`${response.status()} ${response.url()}`))
+  .on('requestfailed', request =>
+    console.log(`${request.failure().errorText} ${request.url()}`))
 
   await page.setViewport({ width: 1280, height: 720 });
 
