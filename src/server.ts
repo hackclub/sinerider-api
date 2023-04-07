@@ -13,9 +13,9 @@ app.use(express.json());
 app.use(cors());
 
 passport.use(new BasicStrategy(
-  function(username, password, done) {
+  function (username, password, done) {
     if (username == "hackclub" && password == SINERIDER_API_SECRET) {
-        return done(null, "hackclub");
+      return done(null, "hackclub");
     } else {
       // Error
       return done(null, false);
@@ -26,10 +26,10 @@ passport.use(new BasicStrategy(
 const port = process.env.PORT ?? 3000;
 
 app.get(
-  "/", 
+  "/",
   (req, res) => {
     res.send("I am alive");
-});
+  });
 
 app.get("/level/:name", (req, res) => {
   const levelName = req.params.name;
@@ -46,23 +46,23 @@ app.get("/all", (req, res) => {
 });
 
 // NOTE: Authentication required!
-app.get("/daily", 
-passport.authenticate('basic', { session: false }),
-(_, res) => {
-  getUnplayedLevel()
-    .then(level => res.json({ level, success: true }))
-    .catch((err) => res.json({ success: false }));
-});
+app.get("/daily",
+  passport.authenticate('basic', { session: false }),
+  (_, res) => {
+    getUnplayedLevel()
+      .then(level => res.json({ level, success: true }))
+      .catch((err) => res.json({ success: false }));
+  });
 
 // NOTE: Authentication required!
-app.get("/generate", 
-passport.authenticate('basic', { session: false }),
-async (req, res) => {
-  const newLevel = await generateLevel();
-  saveLevel(newLevel)
-    .then(() => res.json({ success: true }))
-    .catch(() => res.json({ success: false }));
-});
+app.get("/generate",
+  passport.authenticate('basic', { session: false }),
+  async (req, res) => {
+    const newLevel = await generateLevel();
+    saveLevel(newLevel)
+      .then(() => res.json({ success: true }))
+      .catch(() => res.json({ success: false }));
+  });
 
 app.listen(port, () =>
   console.log(`Doing some black magic on port ${port}...`)
