@@ -1,20 +1,11 @@
-import puppeteer, { Page, TimeoutError } from 'puppeteer';
 import { base } from "./config.js";
-
-declare interface Solution {
-  expression: string,
-  gameplay: string, // url to the gameplay video on cloudinary,
-  level: string,
-  charCount: number,
-  playURL: string,
-  T: number
-}
+import puppeteer, { Page, TimeoutError } from 'puppeteer';
 
 export function saveLevel(levelUri: string) {
   return new Promise((resolve, reject) => {
     base("Levels").create([{
       fields: {
-        URL: levelUri,
+        url: levelUri,
         played: false
       }
     }], (err, records) => {
@@ -33,10 +24,9 @@ export function getUnplayedLevel() {
       filterByFormula: "NOT({played})"
     }).eachPage((records, _) => {
       const randomLevel = records[Math.floor(Math.random() * records.length)];
-      console.log("gets here")
       base("Levels").update(randomLevel.getId(), {
         played: true
-      }).then(() => resolve(randomLevel.get("URL")))
+      }).then(() => resolve(randomLevel.get("url")))
         .catch(err => console.log(err));
 
     }, (err) => reject(err))
@@ -46,10 +36,12 @@ export function getUnplayedLevel() {
 export function saveSolution({
   expression,
   level,
-  T,
+  time,
   charCount,
   playURL,
   gameplay,
+  player,
+  timestamp
 }: Solution) {
   return new Promise((resolve, reject) => {
     base("Leaderboard").create(
@@ -58,10 +50,12 @@ export function saveSolution({
           fields: {
             expression,
             level,
-            T: parseFloat(T.toFixed(2)),
+            time: parseFloat(time.toFixed(2)),
             playURL: playURL.split("?")[1],
             charCount,
             gameplay,
+            player,
+            timestamp,
           },
         },
       ],
@@ -84,7 +78,7 @@ export function getScoresByLevel(levelName: string) {
         view: "Grid view",
         sort: [
           { field: "charCount", direction: "asc" },
-          { field: "T", direction: "asc" },
+          { field: "time", direction: "asc" },
         ],
       })
       .eachPage(
@@ -94,17 +88,21 @@ export function getScoresByLevel(levelName: string) {
             // console.log(level);
             if (level === levelName) {
               const expression = record.get("expression");
-              const T = record.get("T");
+              const time = record.get("time");
               const playURL = record.get("playURL");
               const charCount = record.get("charCount");
               const gameplay = record.get("gameplay") ?? "";
+              const player = record.get("player") ?? "";
+              const timestamp = record.get("timestamp") ?? 0;
 
               scores.push({
                 expression,
-                T,
+                time,
                 playURL,
                 charCount,
                 gameplay,
+                player,
+                timestamp
               } as Solution);
             }
           });
@@ -127,7 +125,7 @@ export function getAllScores() {
         view: "Grid view",
         sort: [
           { field: "charCount", direction: "asc" },
-          { field: "T", direction: "asc" },
+          { field: "time", direction: "asc" },
         ],
       })
       .eachPage(
@@ -136,16 +134,20 @@ export function getAllScores() {
             const level = record.get("level");
             // console.log(level);
             const expression = record.get("expression");
-            const T = record.get("T");
+            const time = record.get("time");
             const playURL = record.get("playURL");
             const charCount = record.get("charCount");
+            const player = record.get("player") ?? "";
+            const timestamp = record.get("timestamp") ?? 0;
 
             scores.push({
               expression,
-              T,
+              time,
               playURL,
               charCount,
               level,
+              timestamp,
+              player,
             } as Solution);
           });
           nextPage();
@@ -167,13 +169,13 @@ export async function generateLevel() {
   const page = await browser.newPage();
 
   page
-  .on('console', message =>
-    console.log(`${message.type().substr(0, 3).toUpperCase()} ${message.text()}`))
-  .on('pageerror', ({ message }) => console.log(message))
-  .on('response', response =>
-    console.log(`${response.status()} ${response.url()}`))
-  .on('requestfailed', request =>
-    console.log(`${request.failure().errorText} ${request.url()}`))
+    .on('console', (message: any) =>
+      console.log(`${message.type().substr(0, 3).toUpperCase()} ${message.text()}`))
+    .on('pageerror', ({ message }: { message: any }) => console.log(message))
+    .on('response', (response: any) =>
+      console.log(`${response.status()} ${response.url()}`))
+    .on('requestfailed', (request: any) =>
+      console.log(`${request.failure().errorText} ${request.url()}`))
 
   await page.setViewport({ width: 1280, height: 720 });
 
