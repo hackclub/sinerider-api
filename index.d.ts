@@ -8,12 +8,3 @@ declare interface Solution {
     player?: string,
     timestamp: number;
 }
-
-declare type ScoringResult = Solution;
-
-declare interface VideoDetails {
-    uri: string,
-    bytes: number,
-    createdAt: string,
-    publicId: string,
-}
