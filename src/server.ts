@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { getScoresByLevel, getAllScores, saveLevel, getUnplayedLevel, generateLevel } from "./airtable.js";
+import { getScoresByLevel, getLevels, saveLevel, getUnplayedLevel, generateLevel } from "./airtable.js";
 import passport from "passport"
 import { BasicStrategy } from "passport-http"
 import { SINERIDER_API_SECRET } from "./config.js";
@@ -31,19 +31,22 @@ app.get(
     res.send("I am alive");
   });
 
-app.get("/level/:name", (req, res) => {
+app.get("/level/:name/:highscoreType", (req, res) => {
   const levelName = req.params.name;
-
-  getScoresByLevel(levelName)
+  const highscoreType = req.params.highscoreType;
+  getScoresByLevel(levelName, highscoreType)
     .then((scores) => res.json({ success: true, scores }))
     .catch((err) => res.json({ success: false, reason: err }));
 });
 
-app.get("/all", (req, res) => {
-  getAllScores()
-    .then((scores) => res.json({ success: true, scores }))
-    .catch((err) => res.json({ success: false, reason: err }));
-});
+app.get("/levels", (req, res) => {
+  getLevels()
+  .then((levels) => {
+    return res.json({ success: true, levels: Array.from(levels) })
+  })
+  .catch((err) => res.json({ success: false, reason: err }));
+
+})
 
 // NOTE: Authentication required!
 app.get("/daily",

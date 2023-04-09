@@ -33,52 +33,43 @@ export function getUnplayedLevel() {
   });
 }
 
-export function saveSolution({
-  expression,
-  level,
-  time,
-  charCount,
-  playURL,
-  gameplay,
-  player,
-  timestamp
-}: Solution) {
-  return new Promise((resolve, reject) => {
-    base("Leaderboard").create(
-      [
-        {
-          fields: {
-            expression,
-            level,
-            time: parseFloat(time.toFixed(2)),
-            playURL: playURL.split("?")[1],
-            charCount,
-            gameplay,
-            player,
-            timestamp,
-          },
-        },
-      ],
-      (error, records) => {
-        if (error) {
-          reject(error);
-        }
+export function getLevels() : Promise<Set<string>> {
+  let levels = new Set<string>();
 
-        records ? resolve({ id: records[0].getId() }) : console.error("Failed to write to airtable");
+  return new Promise((resolve, reject) => {
+    base("Leaderboard")
+    .select({
+      view: "Grid view",
+    })
+    .eachPage(
+      (records, nextPage) => {
+        records.forEach((record) => {
+          levels.add(record.get("level") as string)
+        });
+        nextPage();
+      },
+      (err) => {
+        if (err) reject(err);
+
+        resolve(levels);
       }
     );
-  });
+});
+
 }
 
-export function getScoresByLevel(levelName: string) {
+export function getScoresByLevel(levelName: string, highscoreType: string) {
+  if (highscoreType != "charCount" && highscoreType != "time")
+    throw new Error("Invalid highscoreType");
+
   return new Promise((resolve, reject) => {
     const scores: Partial<Solution>[] = [];
     base("Leaderboard")
       .select({
         view: "Grid view",
+        filterByFormula: `{level}=\"${levelName}\"`,
         sort: [
-          { field: "charCount", direction: "asc" },
-          { field: "time", direction: "asc" },
+          { field: highscoreType, direction: "asc" }
         ],
       })
       .eachPage(
@@ -104,55 +95,13 @@ export function getScoresByLevel(levelName: string) {
                 player,
                 timestamp
               } as Solution);
+            } else {
+              console.log("We should never get here");
             }
           });
           nextPage();
         },
         (err) => {
-          if (err) reject(err);
-
-          resolve(scores);
-        }
-      );
-  });
-}
-
-export function getAllScores() {
-  return new Promise((resolve, reject) => {
-    const scores: Partial<Solution>[] = [];
-    base("Leaderboard")
-      .select({
-        view: "Grid view",
-        sort: [
-          { field: "charCount", direction: "asc" },
-          { field: "time", direction: "asc" },
-        ],
-      })
-      .eachPage(
-        (records, nextPage) => {
-          records.forEach((record) => {
-            const level = record.get("level");
-            // console.log(level);
-            const expression = record.get("expression");
-            const time = record.get("time");
-            const playURL = record.get("playURL");
-            const charCount = record.get("charCount");
-            const player = record.get("player") ?? "";
-            const timestamp = record.get("timestamp") ?? 0;
-
-            scores.push({
-              expression,
-              time,
-              playURL,
-              charCount,
-              level,
-              timestamp,
-              player,
-            } as Solution);
-          });
-          nextPage();
-        },
-        (err: any) => {
           if (err) reject(err);
 
           resolve(scores);
