@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { getScoresByLevel, getLevels, saveLevel, getUnplayedLevel, generateLevel } from "./airtable.js";
+import { getScoresByLevel, getLevels, saveLevel, markPuzzleAsActive, getUnplayedPuzzle, generateLevel } from "./airtable.js";
 import passport from "passport"
 import { BasicStrategy } from "passport-http"
 import { SINERIDER_API_SECRET } from "./config.js";
@@ -49,12 +49,16 @@ app.get("/levels", (req, res) => {
 })
 
 // NOTE: Authentication required!
-app.get("/daily",
+app.get("/generateNewDailyPuzzle",
   passport.authenticate('basic', { session: false }),
-  (_, res) => {
-    getUnplayedLevel()
-      .then(level => res.json({ level, success: true }))
-      .catch((err) => res.json({ success: false }));
+  async (_, res) =>  {
+    try {
+      const puzzleDesc = await getUnplayedPuzzle()
+      await markPuzzleAsActive(puzzleDesc)
+      res.json({puzzleDesc, success:true})
+    } catch (e) {
+      res.status(500).json({success: false, message:"No new daily levels available, please check the Sinerider Puzzles Airtable"})
+    }
   });
 
 // NOTE: Authentication required!

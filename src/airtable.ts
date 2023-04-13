@@ -1,6 +1,14 @@
 import { base } from "./config.js";
 import puppeteer, { Page, TimeoutError } from 'puppeteer';
 
+declare interface PuzzleDefinition {
+  id:string,
+  puzzleTitle: string, // url to the gameplay video on cloudinary,
+  puzzleURL: string,
+  puzzleDescription: string,
+  order: number
+}
+
 export function saveLevel(levelUri: string) {
   return new Promise((resolve, reject) => {
     base("Levels").create([{
@@ -17,20 +25,41 @@ export function saveLevel(levelUri: string) {
   });
 }
 
-export function getUnplayedLevel() {
-  return new Promise((resolve, reject) => {
-    base("Levels").select({
+export function getUnplayedPuzzle() {
+  return new Promise<PuzzleDefinition>((resolve, reject) => {
+    
+    base("Puzzles").select({
       view: "Grid view",
-      filterByFormula: "NOT({played})"
+      filterByFormula: "NOT({active})",
+      sort: [
+        { field: "order", direction: "asc" }
+      ],
+      maxRecords:1
     }).eachPage((records, _) => {
-      const randomLevel = records[Math.floor(Math.random() * records.length)];
-      base("Levels").update(randomLevel.getId(), {
-        played: true
-      }).then(() => resolve(randomLevel.get("url")))
-        .catch(err => console.log(err));
+      if (records.length == 0) {
+        reject("No puzzle available!")
+        return;
+      }
+      const puzzle = records[0]
+      const result = {
+        id:puzzle.getId(),
+        puzzleTitle:puzzle.get("puzzleTitle"), // url to the gameplay video on cloudinary,
+        puzzleURL:puzzle.get("puzzleURL"),
+        puzzleDescription:puzzle.get("puzzleDescription"),
+        order: puzzle.get("order")      
+      } as PuzzleDefinition
+      resolve(result)
+      return;
+    })
+  })
+}
 
-    }, (err) => reject(err))
-  });
+export function markPuzzleAsActive(puzzleDefinition: PuzzleDefinition) {
+  return new Promise((resolve, reject) => {
+    base("Puzzles").update(puzzleDefinition.id, {active: true}).then(() => {
+      resolve(true)
+    }).catch(err => resolve(false));
+  })
 }
 
 export function getLevels() : Promise<Set<string>> {
