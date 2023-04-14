@@ -6,7 +6,8 @@ declare interface PuzzleDefinition {
   puzzleTitle: string, // url to the gameplay video on cloudinary,
   puzzleURL: string,
   puzzleDescription: string,
-  order: number
+  order: number,
+  db_id:string
 }
 
 export function saveLevel(levelUri: string) {
@@ -42,11 +43,12 @@ export function getUnplayedPuzzle() {
       }
       const puzzle = records[0]
       const result = {
-        id:puzzle.getId(),
+        id:puzzle.get("id"),
         puzzleTitle:puzzle.get("puzzleTitle"), // url to the gameplay video on cloudinary,
         puzzleURL:puzzle.get("puzzleURL"),
         puzzleDescription:puzzle.get("puzzleDescription"),
-        order: puzzle.get("order")      
+        order: puzzle.get("order"),
+        db_id: puzzle.id
       } as PuzzleDefinition
       resolve(result)
       return;
@@ -56,7 +58,7 @@ export function getUnplayedPuzzle() {
 
 export function markPuzzleAsActive(puzzleDefinition: PuzzleDefinition) {
   return new Promise((resolve, reject) => {
-    base("Puzzles").update(puzzleDefinition.id, {active: true}).then(() => {
+    base("Puzzles").update(puzzleDefinition.db_id, {active: true}).then(() => {
       resolve(true)
     }).catch(err => resolve(false));
   })

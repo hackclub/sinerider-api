@@ -13,5 +13,7 @@ Airtable.configure({
 const base = Airtable.base(process.env.SINERIDER_AIRTABLE_BASE as string);
 
 export const SINERIDER_API_SECRET = process.env.SINERIDER_API_SECRET
+export const SINERIDER_TWITTER_BOT_URL = process.env.SINERIDER_TWITTER_BOT_URL
+export const SINERIDER_REDDIT_BOT_URL = process.env.SINERIDER_REDDIT_BOT_URL
 
 export { base };
