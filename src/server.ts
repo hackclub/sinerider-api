@@ -3,9 +3,15 @@ import cors from "cors";
 import { getScoresByLevel, getLevels, saveLevel, markPuzzleAsActive, getUnplayedPuzzle, generateLevel } from "./airtable.js";
 import passport from "passport"
 import { BasicStrategy } from "passport-http"
-import { SINERIDER_API_SECRET } from "./config.js";
+import { SINERIDER_API_SECRET, SINERIDER_TWITTER_BOT_URL, SINERIDER_REDDIT_BOT_URL } from "./config.js";
+import lzs from "lz-string";
 
 const app = express();
+
+const BOT_SERVICES = {
+  "TWITTER": SINERIDER_TWITTER_BOT_URL,
+  "REDDIT": SINERIDER_REDDIT_BOT_URL
+}
 
 // setup json
 app.use(express.json());
@@ -49,15 +55,39 @@ app.get("/levels", (req, res) => {
 })
 
 // NOTE: Authentication required!
-app.get("/generateNewDailyPuzzle",
+app.post("/publishNewDailyPuzzle",
   passport.authenticate('basic', { session: false }),
-  async (_, res) =>  {
+  async (_, res) => {
     try {
       const puzzleDesc = await getUnplayedPuzzle()
       await markPuzzleAsActive(puzzleDesc)
-      res.json({puzzleDesc, success:true})
+
+      const puzzleJson = JSON.stringify(puzzleDesc)
+      console.log(`Puzzle payload: ${puzzleJson}`)
+
+      const puzzleInfoJson = JSON.stringify(puzzleDesc)
+      const puzzleInfo = lzs.compressToBase64(puzzleInfoJson)
+
+      // Notify all bots they should publish the puzzle
+      for (const [serviceName, url] of Object.entries(BOT_SERVICES)) {
+        let headers = new Headers();
+        let key = `SINERIDER_${serviceName}_API_KEY`
+        let secret = process.env[key]
+        headers.set('Authorization', 'Basic ' + Buffer.from("hackclub" + ":" + secret).toString('base64'));
+  
+        const fullUrl = `${url}/publishPuzzle?` + new URLSearchParams({ "publishingInfo": puzzleInfo })
+        console.log(`Hitting ${serviceName} bot with URL: ${fullUrl}`)
+
+        
+        const response = await fetch(fullUrl, {method:'POST', headers:headers})
+        if (response.status != 200) {
+          console.log(`Error - response ${response.status} - ${response}`)
+          throw new Error("Whoa, failure!")
+        }
+      }
+      res.json({ "message": "Puzzle published!" })
     } catch (e) {
-      res.status(500).json({success: false, message:"No new daily levels available, please check the Sinerider Puzzles Airtable"})
+      res.status(500).json({ success: false, message: e })
     }
   });
 
