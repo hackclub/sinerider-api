@@ -49,7 +49,10 @@ app.get("/level/:name/:highscoreType", (req, res) => {
 app.get("/levels", (req, res) => {
   getLevels()
   .then((levels) => {
-    return res.json({ success: true, levels: Array.from(levels) })
+
+    const sortAlphaNum = (a:string, b:string) => a.localeCompare(b, 'en', { numeric: true })
+    const sortedLevels = Array.from(levels).sort(sortAlphaNum);
+    return res.json({ success: true, levels: sortedLevels })
   })
   .catch((err) => res.json({ success: false, reason: err }));
 
