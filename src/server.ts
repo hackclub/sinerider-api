@@ -50,7 +50,7 @@ app.get("/levels", (req, res) => {
   getLevels()
   .then((levels) => {
 
-    const sortAlphaNum = (a:string, b:string) => a.localeCompare(b, 'en', { numeric: true })
+    const sortAlphaNum = (a:string, b:string) => b.localeCompare(a, 'en', { numeric: false })
     const sortedLevels = Array.from(levels).sort(sortAlphaNum);
     return res.json({ success: true, levels: sortedLevels })
   })
