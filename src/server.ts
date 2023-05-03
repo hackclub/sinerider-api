@@ -1,10 +1,11 @@
 import express from "express";
 import cors from "cors";
-import { getScoresByLevel, getLevels, saveLevel, markPuzzleAsActive, getUnplayedPuzzle, generateLevel } from "./airtable.js";
+import { getScoresByLevel, getLevels, createNewPuzzle, markPuzzleAsActive, getUnplayedPuzzle, PuzzleDefinition } from "./airtable.js";
 import passport from "passport"
 import { BasicStrategy } from "passport-http"
 import { SINERIDER_API_SECRET, SINERIDER_TWITTER_BOT_URL, SINERIDER_REDDIT_BOT_URL } from "./config.js";
 import lzs from "lz-string";
+import generateRandomLevel from "./puzzle.js";
 
 const app = express();
 
@@ -92,14 +93,44 @@ app.post("/publishNewDailyPuzzle",
   });
 
 // NOTE: Authentication required!
-app.get("/generate",
+app.post("/generate",
   passport.authenticate('basic', { session: false }),
   async (req, res) => {
-    const newLevel = await generateLevel();
-    saveLevel(newLevel)
-      .then(() => res.json({ success: true }))
-      .catch(() => res.json({ success: false }));
-  });
+
+    const requiredFields = ["id", "title", "description", "order"];
+    for (const field of requiredFields) {
+      if (!(field in req.query)) {
+        res.json({success:false, message:"Required field " + field + " not found"})
+        return;  
+      }
+    }
+
+    const id = req.query.id;
+    const title = req.query.title;
+    const description = req.query.description;
+    const order = parseFloat(req.query.order as string);
+    
+    const level = generateRandomLevel() as any
+    level.name = title as string;
+    level.nick = id as string;
+    level.isPuzzle = true
+
+    const puzzleInfoJson = JSON.stringify(level)
+    const puzzleInfo = lzs.compressToBase64(puzzleInfoJson)
+    const url = "https://sinerider.hackclub.dev/?" + puzzleInfo
+    await createNewPuzzle({
+      id:id,
+      puzzleTitle:title,
+      puzzleURL:url,
+      puzzleDescription:description,
+      order: order,
+      db_id: id
+    } as PuzzleDefinition).then(resp => {
+      res.json({ success:true, resp });
+    }).catch(error => {
+      res.json({ success:false, message: error.message })
+    })
+});
 
 app.listen(port, () =>
   console.log(`Doing some black magic on port ${port}...`)

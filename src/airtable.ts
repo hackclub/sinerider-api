@@ -1,7 +1,7 @@
 import { base } from "./config.js";
 import puppeteer, { Page, TimeoutError } from 'puppeteer';
 
-declare interface PuzzleDefinition {
+export declare interface PuzzleDefinition {
   id:string,
   puzzleTitle: string, // url to the gameplay video on cloudinary,
   puzzleURL: string,
@@ -10,12 +10,15 @@ declare interface PuzzleDefinition {
   db_id:string
 }
 
-export function saveLevel(levelUri: string) {
+export function createNewPuzzle(puzzle: PuzzleDefinition) {
   return new Promise((resolve, reject) => {
-    base("Levels").create([{
+    base("Puzzles").create([{
       fields: {
-        url: levelUri,
-        played: false
+        id: puzzle.id,
+        puzzleURL: puzzle.puzzleURL,
+        puzzleTitle: puzzle.puzzleTitle,
+        puzzleDescription:puzzle.puzzleDescription,
+        order: puzzle.order
       }
     }], (err, records) => {
       if (err) reject(err);
@@ -139,53 +142,4 @@ export function getScoresByLevel(levelName: string, highscoreType: string) {
         }
       );
   });
-}
-
-export async function generateLevel() {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
-  const page = await browser.newPage();
-
-  page
-    .on('console', (message: any) =>
-      console.log(`${message.type().substr(0, 3).toUpperCase()} ${message.text()}`))
-    .on('pageerror', ({ message }: { message: any }) => console.log(message))
-    .on('response', (response: any) =>
-      console.log(`${response.status()} ${response.url()}`))
-    .on('requestfailed', (request: any) =>
-      console.log(`${request.failure().errorText} ${request.url()}`))
-
-  await page.setViewport({ width: 1280, height: 720 });
-
-  // selectors
-  const clickToBeginSelector = "#loading-string"; // will have to wait until page is fully loaded before clicking
-  const runButtonSelector = "#run-button";
-  // const victoryLabelSelector = '#victory-label'
-
-  const gameUrl = "https://sinerider.hackclub.dev/#random";
-
-  // goto and wait until all assets are loaded
-  await page.goto(gameUrl, { waitUntil: "networkidle0" });
-
-  // will be better to page.waitForSelector before doing anything else
-  await page.waitForSelector(clickToBeginSelector);
-  const clickToBeginCTA = await page.$(clickToBeginSelector);
-  await clickToBeginCTA?.click();
-
-  // wait for selector here, too
-  await page.waitForSelector(runButtonSelector);
-  const runButton = await page.$(runButtonSelector);
-  await runButton?.click();
-
-  // sleep for 3s
-  setTimeout(() => undefined, 3000);
-
-  const levelURl = await page.evaluate("location.href");
-
-  await browser.close();
-
-  return levelURl as string;
-
 }
