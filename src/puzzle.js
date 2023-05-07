@@ -1,10 +1,10 @@
 // @ts-nocheck
-import _ from "lodash"
+import _ from 'lodash'
 
 export default function generateRandomLevel() {
   const goals = []
-  // Skew towards 2–5 goal levels, with potential for as many as 7
-  const goalCount = _.random(2, _.random(5, 7))
+  // Skew towards 2–3 goal levels, with potential for as many as 7
+  const goalCount = _.random(2, _.random(3, 7))
 
   // Generate goals at random locations
   for (let i = 0; i < goalCount; i++) {
@@ -71,8 +71,7 @@ export default function generateRandomLevel() {
     }
   }
 
-  const sledderCount =
-    goalCount > 2 && Math.random() < 0.5 ? _.random(1, 2) : 1
+  const sledderCount = goalCount > 2 && Math.random() < 0.5 ? _.random(1, 2) : 1
   const sledders = []
   const sledderAssets = [
     'images.ada_sled',
