@@ -71,7 +71,7 @@ export function getLevelUrl(levelName: string) : Promise<string> {
   return new Promise((resolve, reject) => {
     base("Puzzles").select({
       fields: ["puzzleURL"],
-      filterByFormula: `{id}=\"${levelName}\"`,
+      filterByFormula: `AND({active},{id}=\"${levelName}\")`,
     }).firstPage().then(records => { 
       if (records.length == 0) reject("No level found");
       const record = records[0]
