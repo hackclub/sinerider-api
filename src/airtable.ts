@@ -67,6 +67,22 @@ export function markPuzzleAsActive(puzzleDefinition: PuzzleDefinition) {
   })
 }
 
+export function getLevelUrl(levelName: string) : Promise<string> {
+  return new Promise((resolve, reject) => {
+    base("Puzzles").select({
+      fields: ["puzzleURL"],
+      filterByFormula: `{id}=\"${levelName}\"`,
+    }).firstPage().then(records => { 
+      if (records.length == 0) reject("No level found");
+      const record = records[0]
+      const puzzleURL = record.get("puzzleURL")
+      if (puzzleURL == undefined) reject("No level found");
+
+      resolve(puzzleURL as string);
+     })
+  })
+}
+
 export function getLevels() : Promise<Set<string>> {
   let levels = new Set<string>();
 

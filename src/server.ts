@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { getScoresByLevel, getLevels, createNewPuzzle, markPuzzleAsActive, getUnplayedPuzzle, PuzzleDefinition } from "./airtable.js";
+import { getScoresByLevel, getLevelUrl, getLevels, createNewPuzzle, markPuzzleAsActive, getUnplayedPuzzle, PuzzleDefinition } from "./airtable.js";
 import passport from "passport"
 import { BasicStrategy } from "passport-http"
 import { SINERIDER_API_SECRET, SINERIDER_TWITTER_BOT_URL, SINERIDER_REDDIT_BOT_URL } from "./config.js";
@@ -56,6 +56,13 @@ app.get("/levels", (req, res) => {
   })
   .catch((err) => res.json({ success: false, reason: err }));
 
+})
+
+app.get("/puzzle/:nick", (req, res) => {
+  // given a puzzle nick, get the info from airtable and redirect to it
+  getLevelUrl(req.params.nick).then((level) => {
+    return res.redirect(level)
+  }).catch((err) => res.json({ success: false, reason: err }))
 })
 
 // NOTE: Authentication required!
