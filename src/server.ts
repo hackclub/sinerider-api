@@ -127,7 +127,7 @@ app.post("/generate",
 
     const puzzleInfoJson = JSON.stringify(level)
     const puzzleInfo = lzs.compressToBase64(puzzleInfoJson)
-    const url = "https://sinerider.hackclub.dev/?" + puzzleInfo
+    const url = "https://sinerider.com/?" + puzzleInfo
     await createNewPuzzle({
       id:id,
       puzzleTitle:title,
