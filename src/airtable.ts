@@ -31,7 +31,7 @@ export function createNewPuzzle(puzzle: PuzzleDefinition) {
 
 export function getUnplayedPuzzle() {
   return new Promise<PuzzleDefinition>((resolve, reject) => {
-    
+
     base("Puzzles").select({
       view: "Grid view",
       filterByFormula: "NOT({active})",
@@ -72,13 +72,28 @@ export function getLevelUrl(levelName: string) : Promise<string> {
     base("Puzzles").select({
       fields: ["puzzleURL"],
       filterByFormula: `AND({active},{id}=\"${levelName}\")`,
-    }).firstPage().then(records => { 
+    }).firstPage().then(records => {
       if (records.length == 0) reject("No level found");
       const record = records[0]
       const puzzleURL = record.get("puzzleURL")
       if (puzzleURL == undefined) reject("No level found");
 
       resolve(puzzleURL as string);
+     })
+  })
+}
+
+export function getRedditUrl(levelName: string) : Promise<string> {
+  return new Promise((resolve, reject) => {
+    base("Config").select({
+      filterByFormula: `{config_name}=\"reddit_posturl_${levelName}\"`
+    }).firstPage().then(records => {
+      if (records.length == 0) reject("No level found");
+      const record = records[0]
+      const redditURL = record.get("value")
+      if (redditURL == undefined) reject("No level found");
+
+      resolve(redditURL as string);
      })
   })
 }
