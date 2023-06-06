@@ -79,7 +79,7 @@ export function getLevelUrl(levelName: string) : Promise<string> {
       if (puzzleURL == undefined) reject("No level found");
 
       resolve(puzzleURL as string);
-     })
+    })
   })
 }
 
@@ -94,7 +94,7 @@ export function getRedditUrl(levelName: string) : Promise<string> {
       if (redditURL == undefined) reject("No level found");
 
       resolve(redditURL as string);
-     })
+    })
   })
 }
 
@@ -119,8 +119,7 @@ export function getLevels() : Promise<Set<string>> {
         resolve(levels);
       }
     );
-});
-
+  });
 }
 
 export function getScoresByLevel(levelName: string, highscoreType: string) {
