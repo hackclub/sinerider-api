@@ -1,4 +1,5 @@
 import express from "express";
+import { Request, Response } from "express";
 import cors from "cors";
 import { getScoresByLevel, getLevelUrl, getLevels, createNewPuzzle, markPuzzleAsActive, getUnplayedPuzzle, PuzzleDefinition, getRedditUrl } from "./airtable.js";
 import passport from "passport"
@@ -6,6 +7,8 @@ import { BasicStrategy } from "passport-http"
 import { SINERIDER_API_SECRET, SINERIDER_TWITTER_BOT_URL, SINERIDER_REDDIT_BOT_URL } from "./config.js";
 import lzs from "lz-string";
 import generateRandomLevel from "./puzzle.js";
+import responseTime from "response-time"
+import metrics from "./metrics.js";
 
 const app = express();
 
@@ -29,6 +32,17 @@ passport.use(new BasicStrategy(
     }
   }
 ));
+
+app.use(responseTime(function (req: Request, res: Response, time) {
+  const stat = (req.method + '/' + req.url.split('/')[1]).toLowerCase()
+    .replace(/[:.]/g, '')
+    .replace(/\//g, '_')
+  const httpCode = res.statusCode
+  const timingStatKey = `http.response.${stat}`
+  const codeStatKey = `http.response.${stat}.${httpCode}`
+  metrics.timing(timingStatKey, time)
+  metrics.increment(codeStatKey, 1)
+}))
 
 const port = process.env.PORT ?? 3000;
 
