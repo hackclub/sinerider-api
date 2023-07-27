@@ -9,7 +9,7 @@ if (graphite == null) {
 
 const options = {
     host: graphite,
-    port: 2003,
+    port: 8125,
     prefix: `${environment}.sinerider-api.`,
 }
 
