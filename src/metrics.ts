@@ -1,7 +1,7 @@
 import { StatsD } from 'node-statsd'
 
 const environment = process.env.NODE_ENV
-const graphite = '127.0.0.1'
+const graphite = process.env.GRAPHITE_HOST
 
 if (graphite == null) {
     throw new Error('Graphite host not configured!')
