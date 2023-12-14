@@ -6,7 +6,7 @@ The SineRider externally available API
 
 - Send a `GET /generate` to generate a new level, which is then stored in Airtable. It returns the id from Airtable but does not return the URL of the generated game.
 
-- Send a `GET /level/name/highscoreType` Retrieve scores for a specific level and score type. Parameters:
+- Send a `GET /level/<HELLO_WORLD>/highscoreType/charCount` Retrieve scores for a specific level and score type. Parameters:
   - `:name`: Name of the level.
   - `:highscoreType`: Type of highscore to retrieve.
 
@@ -14,9 +14,9 @@ The SineRider externally available API
 
 - Send a `GET /levels` Get a list of all available levels, sorted alphabetically.
 
-- Send a `GET /puzzle/nick` Redirect to a specific puzzle by its nickname.
+- Send a `GET /puzzle/:nick` Redirect to a specific puzzle by its nickname.
 
-- Send a `GET /reddit/nick` Redirect to a Reddit post for a specific puzzle by its nickname.
+- Send a `GET /reddit/:nick` Redirect to a Reddit post for a specific puzzle by its nickname.
 
 ### Authenticated Endpoints
 
@@ -46,22 +46,6 @@ Contributions are encouraged and welcome! There are two GitHub repositories that
    - `npm start`
 
   ## Enviorment Variables
-  `GRAPHITE_HOST=<exampele>` 
-
-  `NODE_ENV=production`
-
-  `SINERIDER_AIRTABLE_API_KEY=<exampele>`
-
-  `SINERIDER_AIRTABLE_BASE=<exampele>`
-
-  `SINERIDER_API_SECRET=<exampele>`
-
-  `SINERIDER_REDDIT_API_KEY=<exampele>`
-
-  `SINERIDER_REDDIT_BOT_URL=<exampele>`
-
-  `SINERIDER_TWITTER_API_KEY=<exampele>`
-
-  `SINERIDER_TWITTER_BOT_URL=<exampele>`
+  Check `.env.env.example` 
 
 
