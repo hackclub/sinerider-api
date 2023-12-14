@@ -10,7 +10,7 @@ The SineRider externally available API
   - `:name`: Name of the level.
   - `:highscoreType`: Type of highscore to retrieve.
 
-  (e.g `/level/HELLO_WORLD`)
+  (e.g `/level/HELLO_WORLD/charCount`)
 
 - Send a `GET /levels` Get a list of all available levels, sorted alphabetically.
 
@@ -46,6 +46,6 @@ Contributions are encouraged and welcome! There are two GitHub repositories that
    - `npm start`
 
   ## Enviorment Variables
-  Check `.env.env.example` 
+  Check `.env.example` 
 
 
