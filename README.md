@@ -22,7 +22,7 @@ The SineRider externally available API
 
 ### Authenticated Endpoints
 
-_Note: This endpoints require basic authentication._
+_Note: This endpoint require basic authentication._
 
 - Send a `POST /publishNewDailyPuzzle` Publish a new daily puzzle across all bot services. Selects a puzzle from unplayed puzzles and marks it as active.
 
