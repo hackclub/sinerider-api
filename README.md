@@ -4,11 +4,48 @@ The SineRider externally available API
 
 ## How to use (endpoints)
 
-- Send a `GET` request to `/all` to get all the scores that have been saved. The scores have been sorted by `charCount` and `T` both in ascending order.
+- Send a `GET /generate` to generate a new level, which is then stored in Airtable. It returns the id from Airtable but does not return the URL of the generated game.
 
-- Send a `GET` request to `/level/<LEVEL_NAME>` (e.g `/level/HELLO_WORLD`) to get all scores for that specific level sorted by `charCount` and `T`.
+- Send a `GET /level/<HELLO_WORLD>/highscoreType/charCount` Retrieve scores for a specific level and score type. Parameters:
+  - `:name`: Name of the level.
+  - `:highscoreType`: Type of highscore to retrieve.
 
-- Send a `GET` request to `/generate` to generate a new level and store it in airtable. Does not return the URL to the generated game
+  (e.g `/level/HELLO_WORLD/charCount`)
 
-- Send a `GET` request to `/daily` to get a random level from the airtable to play. Once the level is returned, the game url will be marked as *played* and may not be returned in the future.
+- Send a `GET /levels` Get a list of all available levels, sorted alphabetically.
+
+- Send a `GET /puzzle/:nick` Redirect to a specific puzzle by its nickname.
+
+- Send a `GET /reddit/:nick` Redirect to a Reddit post for a specific puzzle by its nickname.
+
+### Authenticated Endpoints
+
+_Note: This endpoint require basic authentication._
+
+- Send a `POST /publishNewDailyPuzzle` Publish a new daily puzzle across all bot services. Selects a puzzle from unplayed puzzles and marks it as active.
+
+## Contributing
+
+Contributions are encouraged and welcome! There are two GitHub repositories that contain code for Sinerider: the [Sinerider website](https://github.com/hackclub/sinerider) and [Sinerider API](https://github.com/hackclub/sinerider-api#contributing). Each repository has a section on contributing guidelines and how to run each project locally.
+
+
+## Running locally
+
+1. Clone this repository
+   - `git clone https://github.com/hackclub/sinerider-api && cd sinerider-api`
+
+1. Install dependencies
+   - `npm i`
+1. Create `.env` file at root of project
+   - `touch .env`
+   - Send a message in [hq-engineering](https://app.slack.com/client/T0266FRGM/C05SVRTCDGV) asking for the `.env` file contents
+
+1. Run build
+   - `npm run build`
+1. Start server
+   - `npm start`
+
+  ## Enviorment Variables
+  Check `.env.example` 
+
 
