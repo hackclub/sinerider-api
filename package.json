@@ -24,7 +24,7 @@
     "airtable": "^0.11.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
-    "express": "^4.18.2",
+    "express": "^4.22.1",
     "lodash": "^4.17.21",
     "lz-string": "^1.5.0",
     "nanoid": "^4.0.1",
