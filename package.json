@@ -33,7 +33,7 @@
     "passport-http": "^0.3.0",
     "puppeteer": "^19.6.3",
     "response-time": "^2.3.2",
-    "uuid": "^9.0.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@types/airtable": "^0.10.1",
